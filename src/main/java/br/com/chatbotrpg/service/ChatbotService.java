@@ -8,8 +8,12 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.reader.ExtractedTextFormatter;
 import org.springframework.ai.reader.markdown.MarkdownDocumentReader;
 import org.springframework.ai.reader.markdown.config.MarkdownDocumentReaderConfig;
+import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
+import org.springframework.ai.reader.pdf.ParagraphPdfDocumentReader;
+import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
 import org.springframework.ai.transformer.KeywordMetadataEnricher;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -91,5 +95,25 @@ public class ChatbotService {
 
         this.vectorStore.add(enriched);
 
+    }
+
+    public void loadFiles(List<MultipartFile> files) throws IOException {
+        for (MultipartFile file : files) {
+            loadFiles(file);
+        }
+    }
+
+    public void loadFilePdf(MultipartFile file) throws IOException {
+        Resource resource = new InputStreamResource(file.getInputStream());
+        PdfDocumentReaderConfig readerConfig = PdfDocumentReaderConfig.builder()
+                .withPageTopMargin(4)
+                .withPageExtractedTextFormatter(ExtractedTextFormatter.builder()
+                        .withNumberOfTopTextLinesToDelete(0)
+                        .build())
+                .withPagesPerDocument(1)
+                .build();
+        PagePdfDocumentReader pdfReader = new PagePdfDocumentReader(resource, readerConfig);
+
+        List<Document> documents = pdfReader.read();
     }
 }

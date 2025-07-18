@@ -31,4 +31,12 @@ public class ChatbotController {
         this.service.loadFiles(file);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/load-file-pdf")
+    public ResponseEntity<Void> loadFilePdf(
+            @RequestParam("file") MultipartFile file) throws IOException {
+
+        this.service.loadFilePdf(file);
+        return ResponseEntity.ok().build();
+    }
 }
